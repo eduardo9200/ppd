@@ -37,10 +37,91 @@ public class GameGeneralRules {
 		}
 	}
 	
-	public void moveSementes(Integer casaEscolhida, Jogador jogador) {
+	/**
+	 * Distribui as sementes nas casas do tabuleiro e também implementa a regra de não poder incluir semente no kallah do adversário
+	 * */
+	public void moveSementes(Integer casaEscolhida, Jogador jogador) throws JogadorInvalidoException {
+		int tabuleiroJogador_1 = Jogador.UM.getId().intValue();
+		int tabuleiroJogador_2 = Jogador.DOIS.getId().intValue();
 		
+		if(jogador == Jogador.UM) {
+			int casaInicial = casaEscolhida.intValue() + 1;
+			
+			int numSementesCasaEscolhida = this.tabuleiroJogador_1.get(casaEscolhida);
+			this.tabuleiroJogador_1.set(casaEscolhida, 0);
+			
+			int qtdCasaAtual = 0;
+			int casaAtual = casaInicial;
+			int tabuleiro = tabuleiroJogador_1;
+			
+			for(int i = 0; i < numSementesCasaEscolhida; i++) {
+				if(casaAtual == 7 && tabuleiro == tabuleiroJogador_1) {
+					casaAtual = 0;
+					tabuleiro = tabuleiroJogador_2;
+				
+				} else if(casaAtual == 7 && tabuleiro == tabuleiroJogador_2) {
+					casaAtual = 0;
+					tabuleiro = tabuleiroJogador_1;
+				}
+				
+				if(tabuleiro == tabuleiroJogador_1) {
+					qtdCasaAtual = 0;
+					qtdCasaAtual = this.tabuleiroJogador_1.get(casaAtual);
+					this.tabuleiroJogador_1.set(casaAtual, qtdCasaAtual++);
+					
+				} else if(tabuleiro == tabuleiroJogador_2) {
+					if(casaAtual != 6) {
+						qtdCasaAtual = 0;
+						qtdCasaAtual = this.tabuleiroJogador_2.get(casaAtual);
+						this.tabuleiroJogador_2.set(casaAtual, qtdCasaAtual++);	
+					}
+				}
+				
+				casaAtual++;
+			}
+			
+		} else if (jogador == Jogador.DOIS) {
+			int casaInicial = casaEscolhida.intValue() + 1;
+			
+			int numSementesCasaEscolhida = this.tabuleiroJogador_2.get(casaEscolhida);
+			this.tabuleiroJogador_2.set(casaEscolhida, 0);
+			
+			int qtdCasaAtual = 0;
+			int casaAtual = casaInicial;
+			int tabuleiro = tabuleiroJogador_2;
+			
+			for(int i = 0; i < numSementesCasaEscolhida; i++) {
+				if(casaAtual == 7 && tabuleiro == tabuleiroJogador_1) {
+					casaAtual = 0;
+					tabuleiro = tabuleiroJogador_2;
+				
+				} else if(casaAtual == 7 && tabuleiro == tabuleiroJogador_2) {
+					casaAtual = 0;
+					tabuleiro = tabuleiroJogador_1;
+				}
+				
+				if(tabuleiro == tabuleiroJogador_1) {
+					if(casaAtual != 6) {
+						qtdCasaAtual = 0;
+						qtdCasaAtual = this.tabuleiroJogador_1.get(casaAtual);
+						this.tabuleiroJogador_1.set(casaAtual, qtdCasaAtual++);
+					}
+				
+				} else if(tabuleiro == tabuleiroJogador_2) {
+					qtdCasaAtual = 0;
+					qtdCasaAtual = this.tabuleiroJogador_2.get(casaAtual);
+					this.tabuleiroJogador_2.set(casaAtual, qtdCasaAtual++);
+				}
+			}
+			
+		} else {
+			throw new JogadorInvalidoException("Jogador inválido");
+		}
 	}
 	
+	/**
+	 * 
+	 * */
 	public void capturaSementesAdversarias(Integer casa, Jogador jogador) throws JogadorInvalidoException {
 		int sementesCapturadas = 0;
 		int minhasSementes     = 0;
@@ -50,7 +131,7 @@ public class GameGeneralRules {
 		
 		if(jogador == Jogador.UM) {
 			minhasSementes = this.tabuleiroJogador_1.get(casa);
-			sementesCapturadas = this.tabuleiroJogador_2.get(casa);
+			sementesCapturadas = this.tabuleiroJogador_2.get(getCasaCorrespondente(casa));
 			sementesParaKallah = minhasSementes + sementesCapturadas;
 			this.tabuleiroJogador_1.set(KALLAH_POSITION, (valorAntigoKallahJogador_1 + sementesParaKallah));
 			this.tabuleiroJogador_1.set(casa, 0);
@@ -58,7 +139,7 @@ public class GameGeneralRules {
 		
 		} else if(jogador == Jogador.DOIS) {
 			minhasSementes = this.tabuleiroJogador_2.get(casa);
-			sementesCapturadas = this.tabuleiroJogador_1.get(casa);
+			sementesCapturadas = this.tabuleiroJogador_1.get(getCasaCorrespondente(casa));
 			sementesParaKallah = minhasSementes + sementesCapturadas;
 			this.tabuleiroJogador_2.set(KALLAH_POSITION, (valorAntigoKallahJogador_2 + sementesParaKallah));
 			this.tabuleiroJogador_2.set(casa, 0);
@@ -69,11 +150,41 @@ public class GameGeneralRules {
 		}
 	}
 	
+	/**
+	 * Como os tabuleiros estão de cabeça para baixo, de um em relação ao outro,
+	 * então é necessário fazer essa correspondência, sendo relevante na captura
+	 * de peças adversárias.
+	 * */	
+	private Integer getCasaCorrespondente(Integer casa) {
+		switch(casa) {
+		case 0:
+			return 5;
+		case 1:
+			return 4;
+		case 2:
+			return 3;
+		case 3:
+			return 2;
+		case 4:
+			return 1;
+		case 5:
+			return 0;
+		case 6:
+			return 6;
+		default:
+			return null;
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * */
 	public Jogador finalizaJogo() {
 		int somaJogador_1 = 0;
 		int somaJogador_2 = 0;
 		
-		for(int i = 0; i < (NUMBER_OF_POSITIONS - 1); i++) { //-1 para não iterar o kallah, que é a última posição da lista;
+		for(int i = 0; i < (NUMBER_OF_POSITIONS - 1); i++) { //-1 para não iterar a kallah, que é a última posição da lista;
 			somaJogador_1 += this.tabuleiroJogador_1.get(i);
 			somaJogador_2 += this.tabuleiroJogador_2.get(i);
 			
@@ -91,6 +202,9 @@ public class GameGeneralRules {
 		return vencedor;
 	}
 	
+	/**
+	 * 
+	 * */
 	public Jogador apuraJogo() {
 		int kallahJogador_1 = this.tabuleiroJogador_1.get(KALLAH_POSITION);
 		int kallahJogador_2 = this.tabuleiroJogador_2.get(KALLAH_POSITION);
@@ -106,6 +220,9 @@ public class GameGeneralRules {
 		return vencedor;
 	}
 	
+	/**
+	 * 
+	 * */
 	public void printTabuleiro() {
 		for(int i = 0; i < NUMBER_OF_POSITIONS; i++) {
 			System.out.println("i=" + (i+1) + "/" + this.tabuleiroJogador_1.get(i) + "/" + this.tabuleiroJogador_2.get(i));
