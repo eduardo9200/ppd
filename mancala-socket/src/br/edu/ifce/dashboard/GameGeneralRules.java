@@ -320,6 +320,29 @@ public class GameGeneralRules {
 	}
 	
 	/**
+	 * 
+	 * */
+	public void reiniciarPartida() {
+		this.tabuleiroJogador_1 = null;
+		this.tabuleiroJogador_2 = null;
+		
+		this.criaTabuleiro();
+	}
+	
+	/**
+	 * 
+	 * */
+	public Jogador desistir(Jogador jogador) {
+		Jogador vencedor = Jogador.NENHUM;
+		
+		if(jogador == Jogador.UM)
+			vencedor = Jogador.DOIS;
+		else if(jogador == Jogador.DOIS)
+			vencedor = Jogador.UM;
+		return vencedor;
+	}
+	
+	/**
 	 * Faz um print do tabuleiro em determinado momento.
 	 * Método utilizado para testes.
 	 * 
