@@ -2,17 +2,30 @@ package br.edu.ifce.dashboard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import br.edu.ifce.exceptions.JogadorInvalidoException;
+import lombok.Getter;
 
 public class GameGeneralRules {
 
+	@Getter
 	private List<Integer> tabuleiroJogador_1;
+	@Getter
 	private List<Integer> tabuleiroJogador_2;
+	
+	@Getter
+	private List<Integer> tabuleiroJogador_1_jogada_anterior;
+	@Getter
+	private List<Integer> tabuleiroJogador_2_jogada_anterior;
+	@Getter
+	private List<Integer> tabuleiroJogador_1_refazer_jogada;
+	@Getter
+	private List<Integer> tabuleiroJogador_2_refazer_jogada;
 	
 	private static int NUMBER_OF_POSITIONS = 7; //Número de casas do tabuleiro para cada jogador (6 casas + 1 Kallah);
 	private static int KALLAH_POSITION 	   = 6; //Posição na lista da Kallah de cada jogador;
-	
+	private Jogador jogadorDaVez = Jogador.NENHUM;
 	/**
 	 * Cria os elementos mais básicos do tabuleiro, que são as casas
 	 * a serem utilizadas e a quantidade de sementes que cada casa
@@ -42,6 +55,8 @@ public class GameGeneralRules {
 	 * Distribui as sementes nas casas do tabuleiro e também implementa a regra de não poder incluir semente no kallah do adversário
 	 * */
 	public CasaUltimaSemente moveSementes(Integer casaEscolhida, Jogador jogador) throws JogadorInvalidoException {
+		this.mudaJogadorDaVez(jogador);
+		this.atualizaJogadaAnterior();
 		
 		if(jogador == Jogador.UM) {
 			return this.mover(casaEscolhida, this.tabuleiroJogador_1, this.tabuleiroJogador_2, jogador);
@@ -52,6 +67,18 @@ public class GameGeneralRules {
 		} else {
 			throw new JogadorInvalidoException("Jogador inválido");
 		}
+	}
+	
+	/**
+	 * 
+	 * */
+	private void mudaJogadorDaVez(Jogador jogador) {
+		if(jogador == Jogador.UM)
+			jogadorDaVez = Jogador.DOIS;
+		else if(jogador == Jogador.DOIS)
+			jogadorDaVez = Jogador.UM;
+		else
+			jogadorDaVez = Jogador.NENHUM;
 	}
 	
 	/**
@@ -150,18 +177,24 @@ public class GameGeneralRules {
 		Long idTabuleiro = ultimaCasa.getIdTabuleiro();
 		int qtdUltimaCasa;
 		
+		Boolean temDireito;
+		
 		switch(jogador) {
 			case UM:
 				qtdUltimaCasa = this.tabuleiroJogador_1.get(ultimaCasa.getCasa());
-				return (idTabuleiro == Jogador.UM.getId() && ultimaCasa.getCasa() != KALLAH_POSITION && qtdUltimaCasa == 1);
+				temDireito = (idTabuleiro == Jogador.UM.getId() && ultimaCasa.getCasa() != KALLAH_POSITION && qtdUltimaCasa == 1);
+				break;
 			
 			case DOIS:
 				qtdUltimaCasa = this.tabuleiroJogador_2.get(ultimaCasa.getCasa());
-				return (idTabuleiro == Jogador.DOIS.getId() && ultimaCasa.getCasa() != KALLAH_POSITION && qtdUltimaCasa == 1);
+				temDireito = (idTabuleiro == Jogador.DOIS.getId() && ultimaCasa.getCasa() != KALLAH_POSITION && qtdUltimaCasa == 1);
+				break;
 			
 			default:
 				return Boolean.FALSE;
 		}
+		
+		return temDireito && (jogador != jogadorDaVez);
 	}
 	
 	/**
@@ -200,7 +233,7 @@ public class GameGeneralRules {
 	 *  @param valorAntigoMinhaKallah 	um valor inteiro representando a quantidade que o jogador da jogada possuía em sua kallah, que será somado à quantidade de sementes capturadas do jogador adversário;
 	 *  @return void
 	 * */
-	public void captura(Integer casa, List<Integer> meuTabuleiro, List<Integer> tabuleiroAdversario, Integer valorAntigoMinhaKallah) {
+	private void captura(Integer casa, List<Integer> meuTabuleiro, List<Integer> tabuleiroAdversario, Integer valorAntigoMinhaKallah) {
 		int minhasSementes 	   = meuTabuleiro.get(casa);
 		int sementesCapturadas = tabuleiroAdversario.get(this.getCasaCorrespondente(casa));
 		int sementesParaKallah = minhasSementes + sementesCapturadas;
@@ -250,19 +283,16 @@ public class GameGeneralRules {
 	 * 
 	 * */
 	public Boolean isNecessarioFinalizarJogo() {
-		Boolean tabuleiro_1_vazio = this.tabuleiroJogador_1
-				.stream()
-				.filter(posicao -> posicao != 0)
-				.findAny()
-				.isEmpty();
-				
+		Boolean tabuleiro_1_vazio = true;
+		Boolean tabuleiro_2_vazio = true;
 		
-		Boolean tabuleiro_2_vazio = this.tabuleiroJogador_2
-				.stream()
-				.filter(posicao -> posicao != 0)
-				.findAny()
-				.isEmpty();
-		
+		for(int i = 0; i < KALLAH_POSITION; i++) {
+			if(this.tabuleiroJogador_1.get(i) != 0)
+				tabuleiro_1_vazio = false;
+			
+			if(this.tabuleiroJogador_2.get(i) != 0)
+				tabuleiro_2_vazio = false;
+		}	
 		return tabuleiro_1_vazio || tabuleiro_2_vazio;
 	}
 	
@@ -317,6 +347,40 @@ public class GameGeneralRules {
 		}
 		
 		return vencedor;
+	}
+	
+	/**
+	 * 
+	 * */
+	private void atualizaJogadaAnterior() {
+		this.tabuleiroJogador_1_jogada_anterior = this.tabuleiroJogador_1;
+		this.tabuleiroJogador_2_jogada_anterior = this.tabuleiroJogador_2;
+	}
+	
+	/**
+	 * 
+	 * */
+	private void atualizaRefazerJogada() {
+		this.tabuleiroJogador_1_refazer_jogada = this.tabuleiroJogador_1;
+		this.tabuleiroJogador_2_refazer_jogada = this.tabuleiroJogador_2;
+	}
+	
+	/**
+	 * 
+	 * */
+	public void desfazerJogada() {
+		this.atualizaRefazerJogada();
+		this.tabuleiroJogador_1 = this.tabuleiroJogador_1_jogada_anterior;
+		this.tabuleiroJogador_2 = this.tabuleiroJogador_2_jogada_anterior;
+	}
+	
+	/**
+	 * 
+	 * */
+	public void refazerJogada() {
+		this.atualizaJogadaAnterior();
+		this.tabuleiroJogador_1 = this.tabuleiroJogador_1_refazer_jogada;
+		this.tabuleiroJogador_2 = this.tabuleiroJogador_2_refazer_jogada;
 	}
 	
 	/**

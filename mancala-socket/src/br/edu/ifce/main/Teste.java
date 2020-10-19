@@ -2,6 +2,7 @@ package br.edu.ifce.main;
 
 import br.edu.ifce.dashboard.GameGeneralRules;
 import br.edu.ifce.dashboard.Jogador;
+import com.google.gson.Gson;
 
 public class Teste {
 
