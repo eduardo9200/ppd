@@ -314,9 +314,30 @@ public class Tela extends JFrame {
 		return game;
 	}
 	
+	private void desabilitaBotoesAdversarios(Jogador eu) {
+		if(eu == Jogador.AMARELO) {
+			this.btnCasaB1.setEnabled(false);
+			this.btnCasaB2.setEnabled(false);
+			this.btnCasaB3.setEnabled(false);
+			this.btnCasaB4.setEnabled(false);
+			this.btnCasaB5.setEnabled(false);
+			this.btnCasaB6.setEnabled(false);
+		
+		} else if(eu == Jogador.AZUL) {
+			this.btnCasaA1.setEnabled(false);
+			this.btnCasaA2.setEnabled(false);
+			this.btnCasaA3.setEnabled(false);
+			this.btnCasaA4.setEnabled(false);
+			this.btnCasaA5.setEnabled(false);
+			this.btnCasaA6.setEnabled(false);
+		}
+	}
+	
 	private void atualizaTabuleiro(GameGeneralRules game) {
 		this.casasJogador_1 = game.getTabuleiroJogador_1();
 		this.casasJogador_2 = game.getTabuleiroJogador_2();
+		
+		System.out.println("Jogador da Vez: " + game.getJogadorDaVez().getDescricao());
 		
 		this.btnCasaA1.setText(this.casasJogador_1.get(0).toString());
 		this.btnCasaA2.setText(this.casasJogador_1.get(1).toString());
@@ -335,20 +356,28 @@ public class Tela extends JFrame {
 		this.btnKallahB.setText(this.casasJogador_2.get(6).toString());
 	}
 	
+	private Boolean validaJogada(Jogador jogadorQueQuerJogar) {
+		return game.getJogadorDaVez() == jogadorQueQuerJogar;
+	}
+	
 	private void estabeleceConexao() {
 		return;
 	}
 	
 	private void estabeleceJogadores() {
-		this.eu = Jogador.UM;
-		this.adversario = Jogador.DOIS;
+		this.eu = Jogador.AMARELO;
+		this.adversario = Jogador.AZUL;
+		game.mudaJogadorDaVez(Jogador.AMARELO);
+		game.mudaJogadorDaVez(Jogador.AZUL);
+		this.desabilitaBotoesAdversarios(eu);
 	}
 	
-	private void validaUltimaCasa(CasaUltimaSemente ultimaCasa) throws NullPointerException {
+	private void validaUltimaCasa(CasaUltimaSemente ultimaCasa, Jogador jogadorDaVez) throws NullPointerException {
 		if(ultimaCasa.getIdTabuleiro() == null) {
 			String mensagem = "A casa escolhida está vazia. Escolha outra casa.";
 			int messageType = JOptionPane.WARNING_MESSAGE;
 			this.mostraMensagem(mensagem, messageType);
+			game.mudaJogadorDaVez(jogadorDaVez == Jogador.AMARELO ? Jogador.AZUL : Jogador.AMARELO); //Garante que a vez não será passada ao outro jogador, caso a casa selecionada esteja vazia
 			throw new NullPointerException("Casa selecionada vazia.");
 		}
 	}
@@ -359,7 +388,7 @@ public class Tela extends JFrame {
 			CasaUltimaSemente ultimaCasa = this.game.moveSementes(posicaoCasaNaLista, jogador);
 			this.atualizaTabuleiro(game);
 			
-			validaUltimaCasa(ultimaCasa);
+			validaUltimaCasa(ultimaCasa, jogador);
 			
 			if(game.temDireitoACapturaDeSementes(ultimaCasa, eu)) {
 				String mensagem = "A última semente caiu em uma casa sua vazia. Você capturou as sementes adversárias da casa correspondente.";
@@ -375,11 +404,13 @@ public class Tela extends JFrame {
 			}
 			
 			if(game.temDireitoANovaJogada(ultimaCasa, eu)) {
+				game.mudaJogadorDaVez(eu == Jogador.AMARELO ? Jogador.AZUL : Jogador.AMARELO);
 				String mensagem = "A última semente caiu em sua Kallah. Você tem direito a uma nova jogada.";
 				int messageType = JOptionPane.INFORMATION_MESSAGE;
 				this.mostraMensagem(mensagem, messageType);
 				
 			} else if(game.temDireitoANovaJogada(ultimaCasa, adversario)) {
+				game.mudaJogadorDaVez(adversario == Jogador.AMARELO ? Jogador.AZUL : Jogador.AMARELO);
 				String mensagem = "A última semente do adversário caiu na Kallah dele. Ele tem direito a uma nova jogada.";
 				int messageType =  JOptionPane.WARNING_MESSAGE;
 				this.mostraMensagem(mensagem, messageType);
@@ -454,63 +485,123 @@ public class Tela extends JFrame {
 	}
 	
 	private void btnCasaA1ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 1;
-		this.moverSementes(casaNoTabuleiro, eu);
+		if(validaJogada(Jogador.AMARELO)) {
+			game.mudaJogadorDaVez(Jogador.AMARELO);
+			int casaNoTabuleiro = 1;
+			this.moverSementes(casaNoTabuleiro, eu);	
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
+		}
 	}
 	
 	private void btnCasaA2ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 2;
-		this.moverSementes(casaNoTabuleiro, eu);
+		if(validaJogada(Jogador.AMARELO)) {
+			game.mudaJogadorDaVez(Jogador.AMARELO);
+			int casaNoTabuleiro = 2;
+			this.moverSementes(casaNoTabuleiro, eu);
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
+		}
 	}
 	
 	private void btnCasaA3ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 3;
-		this.moverSementes(casaNoTabuleiro, eu);
+		if(validaJogada(Jogador.AMARELO)) {
+			game.mudaJogadorDaVez(Jogador.AMARELO);
+			int casaNoTabuleiro = 3;
+			this.moverSementes(casaNoTabuleiro, eu);
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
+		}
 	}
 	
 	private void btnCasaA4ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 4;
-		this.moverSementes(casaNoTabuleiro, eu);
+		if(validaJogada(Jogador.AMARELO)) {
+			game.mudaJogadorDaVez(Jogador.AMARELO);
+			int casaNoTabuleiro = 4;
+			this.moverSementes(casaNoTabuleiro, eu);	
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
+		}
 	}
 	
 	private void btnCasaA5ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 5;
-		this.moverSementes(casaNoTabuleiro, eu);
+		if(validaJogada(Jogador.AMARELO)) {
+			game.mudaJogadorDaVez(Jogador.AMARELO);
+			int casaNoTabuleiro = 5;
+			this.moverSementes(casaNoTabuleiro, eu);
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
+		}
 	}
 	
 	private void btnCasaA6ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 6;
-		this.moverSementes(casaNoTabuleiro, eu);
+		if(validaJogada(Jogador.AMARELO)) {
+			game.mudaJogadorDaVez(Jogador.AMARELO);
+			int casaNoTabuleiro = 6;
+			this.moverSementes(casaNoTabuleiro, eu);
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
+		}
 	}
 	
 	private void btnCasaB1ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 1;
-		this.moverSementes(casaNoTabuleiro, adversario);
+		if(validaJogada(Jogador.AZUL)) {
+			game.mudaJogadorDaVez(Jogador.AZUL);
+			int casaNoTabuleiro = 1;
+			this.moverSementes(casaNoTabuleiro, adversario);	
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
+		}
 	}
 	
 	private void btnCasaB2ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 2;
-		this.moverSementes(casaNoTabuleiro, adversario);
+		if(validaJogada(Jogador.AZUL)) {
+			game.mudaJogadorDaVez(Jogador.AZUL);
+			int casaNoTabuleiro = 2;
+			this.moverSementes(casaNoTabuleiro, adversario);
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
+		}
 	}
 	
 	private void btnCasaB3ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 3;
-		this.moverSementes(casaNoTabuleiro, adversario);
+		if(validaJogada(Jogador.AZUL)) {
+			game.mudaJogadorDaVez(Jogador.AZUL);
+			int casaNoTabuleiro = 3;
+			this.moverSementes(casaNoTabuleiro, adversario);
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
+		}
 	}
 	
 	private void btnCasaB4ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 4;
-		this.moverSementes(casaNoTabuleiro, adversario);
+		if(validaJogada(Jogador.AZUL)) {
+			game.mudaJogadorDaVez(Jogador.AZUL);
+			int casaNoTabuleiro = 4;
+			this.moverSementes(casaNoTabuleiro, adversario);
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
+		}
 	}
 	
 	private void btnCasaB5ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 5;
-		this.moverSementes(casaNoTabuleiro, adversario);
+		if(validaJogada(Jogador.AZUL)) {
+			game.mudaJogadorDaVez(Jogador.AZUL);
+			int casaNoTabuleiro = 5;
+			this.moverSementes(casaNoTabuleiro, adversario);
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
+		}
 	}
 	
 	private void btnCasaB6ActionPerformed(ActionEvent e) {
-		int casaNoTabuleiro = 6;
-		this.moverSementes(casaNoTabuleiro, adversario);
+		if(validaJogada(Jogador.AZUL)) {
+			game.mudaJogadorDaVez(Jogador.AZUL);
+			int casaNoTabuleiro = 6;
+			this.moverSementes(casaNoTabuleiro, adversario);
+		} else {
+			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
+		}
 	}
 	
 	/* Actions Performed - END */

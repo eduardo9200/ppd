@@ -25,7 +25,10 @@ public class GameGeneralRules {
 	
 	private static int NUMBER_OF_POSITIONS = 7; //Número de casas do tabuleiro para cada jogador (6 casas + 1 Kallah);
 	private static int KALLAH_POSITION 	   = 6; //Posição na lista da Kallah de cada jogador;
-	private Jogador jogadorDaVez = Jogador.NENHUM;
+	
+	@Getter
+	public Jogador jogadorDaVez = Jogador.NENHUM;
+	
 	/**
 	 * Cria os elementos mais básicos do tabuleiro, que são as casas
 	 * a serem utilizadas e a quantidade de sementes que cada casa
@@ -55,13 +58,13 @@ public class GameGeneralRules {
 	 * Distribui as sementes nas casas do tabuleiro e também implementa a regra de não poder incluir semente no kallah do adversário
 	 * */
 	public CasaUltimaSemente moveSementes(Integer casaEscolhida, Jogador jogador) throws JogadorInvalidoException {
-		this.mudaJogadorDaVez(jogador);
+		//this.mudaJogadorDaVez(jogador);
 		this.atualizaJogadaAnterior();
 		
-		if(jogador == Jogador.UM) {
+		if(jogador == Jogador.AMARELO) {
 			return this.mover(casaEscolhida, this.tabuleiroJogador_1, this.tabuleiroJogador_2, jogador);
 			
-		} else if (jogador == Jogador.DOIS) {
+		} else if (jogador == Jogador.AZUL) {
 			return this.mover(casaEscolhida, this.tabuleiroJogador_2, this.tabuleiroJogador_1, jogador);
 			
 		} else {
@@ -72,13 +75,14 @@ public class GameGeneralRules {
 	/**
 	 * 
 	 * */
-	private void mudaJogadorDaVez(Jogador jogador) {
-		if(jogador == Jogador.UM)
-			jogadorDaVez = Jogador.DOIS;
-		else if(jogador == Jogador.DOIS)
-			jogadorDaVez = Jogador.UM;
+	public void mudaJogadorDaVez(Jogador jogador) {
+		if(jogador == Jogador.AMARELO)
+			jogadorDaVez = Jogador.AZUL;
+		else if(jogador == Jogador.AZUL)
+			jogadorDaVez = Jogador.AMARELO;
 		else
 			jogadorDaVez = Jogador.NENHUM;
+		System.out.println(jogadorDaVez);
 	}
 	
 	/**
@@ -98,13 +102,13 @@ public class GameGeneralRules {
 		
 		Long tabuleiro = jogador.getId();
 		
-		Long meuTab = (jogador == Jogador.UM)
-					 ? Jogador.UM.getId()
-					 : ((jogador == Jogador.DOIS) ? Jogador.DOIS.getId() : null);
+		Long meuTab = (jogador == Jogador.AMARELO)
+					 ? Jogador.AMARELO.getId()
+					 : ((jogador == Jogador.AZUL) ? Jogador.AZUL.getId() : null);
 		
-		Long advTab = (jogador == Jogador.UM)
-					 ? Jogador.DOIS.getId()
-					 : ((jogador == Jogador.DOIS) ? Jogador.UM.getId() : null);
+		Long advTab = (jogador == Jogador.AMARELO)
+					 ? Jogador.AZUL.getId()
+					 : ((jogador == Jogador.AZUL) ? Jogador.AMARELO.getId() : null);
 					 
 		int foraDoIndiceListas = KALLAH_POSITION + 1;
 		
@@ -155,11 +159,11 @@ public class GameGeneralRules {
 		Long idTabuleiro = ultimaCasa.getIdTabuleiro();
 		
 		switch(jogador) {
-			case UM:
-				return (idTabuleiro == Jogador.UM.getId() && ultimaCasa.getCasa() == KALLAH_POSITION);
+			case AMARELO:
+				return (idTabuleiro == Jogador.AMARELO.getId() && ultimaCasa.getCasa() == KALLAH_POSITION);
 				
-			case DOIS:
-				return (idTabuleiro == Jogador.DOIS.getId() && ultimaCasa.getCasa() == KALLAH_POSITION);
+			case AZUL:
+				return (idTabuleiro == Jogador.AZUL.getId() && ultimaCasa.getCasa() == KALLAH_POSITION);
 			
 			default:
 				return Boolean.FALSE;
@@ -180,14 +184,14 @@ public class GameGeneralRules {
 		Boolean temDireito;
 		
 		switch(jogador) {
-			case UM:
+			case AMARELO:
 				qtdUltimaCasa = this.tabuleiroJogador_1.get(ultimaCasa.getCasa());
-				temDireito = (idTabuleiro == Jogador.UM.getId() && ultimaCasa.getCasa() != KALLAH_POSITION && qtdUltimaCasa == 1);
+				temDireito = (idTabuleiro == Jogador.AMARELO.getId() && ultimaCasa.getCasa() != KALLAH_POSITION && qtdUltimaCasa == 1);
 				break;
 			
-			case DOIS:
+			case AZUL:
 				qtdUltimaCasa = this.tabuleiroJogador_2.get(ultimaCasa.getCasa());
-				temDireito = (idTabuleiro == Jogador.DOIS.getId() && ultimaCasa.getCasa() != KALLAH_POSITION && qtdUltimaCasa == 1);
+				temDireito = (idTabuleiro == Jogador.AZUL.getId() && ultimaCasa.getCasa() != KALLAH_POSITION && qtdUltimaCasa == 1);
 				break;
 			
 			default:
@@ -211,11 +215,11 @@ public class GameGeneralRules {
 	public void capturaSementesAdversarias(Integer casa, Jogador jogador) throws JogadorInvalidoException {
 		int valorAntigoMinhaKallah;
 		
-		if(jogador == Jogador.UM) {
+		if(jogador == Jogador.AMARELO) {
 			valorAntigoMinhaKallah = this.tabuleiroJogador_1.get(KALLAH_POSITION);
 			this.captura(casa, tabuleiroJogador_1, tabuleiroJogador_2, valorAntigoMinhaKallah);
 		
-		} else if(jogador == Jogador.DOIS) {
+		} else if(jogador == Jogador.AZUL) {
 			valorAntigoMinhaKallah = this.tabuleiroJogador_2.get(KALLAH_POSITION);
 			this.captura(casa, tabuleiroJogador_2, tabuleiroJogador_1, valorAntigoMinhaKallah);
 			
@@ -341,9 +345,9 @@ public class GameGeneralRules {
 		Jogador vencedor = Jogador.NENHUM;
 		
 		if(kallahJogador_1 > kallahJogador_2) {
-			vencedor = Jogador.UM;
+			vencedor = Jogador.AMARELO;
 		} else if(kallahJogador_2 > kallahJogador_1) {
-			vencedor = Jogador.DOIS;
+			vencedor = Jogador.AZUL;
 		}
 		
 		return vencedor;
@@ -399,10 +403,10 @@ public class GameGeneralRules {
 	public Jogador desistir(Jogador jogador) {
 		Jogador vencedor = Jogador.NENHUM;
 		
-		if(jogador == Jogador.UM)
-			vencedor = Jogador.DOIS;
-		else if(jogador == Jogador.DOIS)
-			vencedor = Jogador.UM;
+		if(jogador == Jogador.AMARELO)
+			vencedor = Jogador.AZUL;
+		else if(jogador == Jogador.AZUL)
+			vencedor = Jogador.AMARELO;
 		return vencedor;
 	}
 	
