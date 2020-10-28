@@ -558,7 +558,7 @@ public class Tela extends JFrame {
 				  "1. O primeiro a iniciar a partida será através de um consenso entre os jogadores, via chat;\n"
 				+ "2. Ao clicar em uma casa, as sementes são distribuídas automaticamente;\n"
 				+ "3. Os direitos de captura de sementes do adversário e de uma nova jogada são verificadas e informadas automaticamente aos jogadores."
-				+ ""
+				+ "4. Os arquivos do projeto se encontram em: https://github.com/eduardo9200/ppd/tree/master/mancala-socket"
 				+ ""
 				+ ""
 				+ "");
