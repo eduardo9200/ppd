@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 
 import br.edu.ifce.dashboard.Tela;
 
+@Deprecated //O método main agora está na classe Tela.java;
 public class Main {
 
 public static void main(String[] args) {

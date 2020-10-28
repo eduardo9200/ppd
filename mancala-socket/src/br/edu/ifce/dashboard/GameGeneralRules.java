@@ -357,16 +357,29 @@ public class GameGeneralRules {
 	 * 
 	 * */
 	private void atualizaJogadaAnterior() {
-		this.tabuleiroJogador_1_jogada_anterior = this.tabuleiroJogador_1;
-		this.tabuleiroJogador_2_jogada_anterior = this.tabuleiroJogador_2;
+		this.tabuleiroJogador_1_jogada_anterior = new ArrayList<>();
+		this.tabuleiroJogador_2_jogada_anterior = new ArrayList<>();
+		
+		for(int i = 0; i < NUMBER_OF_POSITIONS; i++) {
+			this.tabuleiroJogador_1_jogada_anterior.add(this.tabuleiroJogador_1.get(i));
+			this.tabuleiroJogador_2_jogada_anterior.add(this.tabuleiroJogador_2.get(i));
+		}
+		
+		//this.tabuleiroJogador_1_jogada_anterior = this.tabuleiroJogador_1;
+		//this.tabuleiroJogador_2_jogada_anterior = this.tabuleiroJogador_2;
 	}
 	
 	/**
 	 * 
 	 * */
 	private void atualizaRefazerJogada() {
-		this.tabuleiroJogador_1_refazer_jogada = this.tabuleiroJogador_1;
-		this.tabuleiroJogador_2_refazer_jogada = this.tabuleiroJogador_2;
+		this.tabuleiroJogador_1_refazer_jogada = new ArrayList<>();
+		this.tabuleiroJogador_2_refazer_jogada = new ArrayList<>();
+		
+		for(int i = 0; i < NUMBER_OF_POSITIONS; i++) {
+			this.tabuleiroJogador_1_refazer_jogada.add(this.tabuleiroJogador_1.get(i));
+			this.tabuleiroJogador_2_refazer_jogada.add(this.tabuleiroJogador_2.get(i));
+		}
 	}
 	
 	/**

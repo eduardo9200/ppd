@@ -10,19 +10,15 @@ import lombok.Getter;
 
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -30,7 +26,6 @@ import java.awt.Color;
 import java.awt.EventQueue;
 
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JScrollPane;
 
 public class Tela extends JFrame {
@@ -92,11 +87,15 @@ public class Tela extends JFrame {
 		
 		//Desfazer Jogada
 		btnDesfazerJogada = new JButton("Desfazer");
+		btnDesfazerJogada.setToolTipText("Bug N\u00E3o resolvido");
+		btnDesfazerJogada.setEnabled(false);
 		btnDesfazerJogada.setBounds(20, 257, 89, 35);
 		contentPane.add(btnDesfazerJogada);
 		
 		//Refazer Jogada
 		btnRefazerJogada = new JButton("Refazer");
+		btnRefazerJogada.setToolTipText("Bug n\u00E3o resolvido");
+		btnRefazerJogada.setEnabled(false);
 		btnRefazerJogada.setBounds(121, 257, 89, 35);
 		contentPane.add(btnRefazerJogada);
 		
@@ -216,7 +215,7 @@ public class Tela extends JFrame {
 		textAreaChat.setWrapStyleWord(true);
 		
 		btnInformacoes = new JButton("Inform\u00E7\u00F5es");
-		btnInformacoes.setBounds(20, 11, 89, 23);
+		btnInformacoes.setBounds(20, 11, 108, 23);
 		contentPane.add(btnInformacoes);
 		
 		btnInformacoes.addActionListener(new ActionListener() {
@@ -556,7 +555,7 @@ public class Tela extends JFrame {
 	
 	private void btnInformacoesActionPerformed(ActionEvent e) {
 		JOptionPane.showMessageDialog(this,
-				  "1. O primeiro a iniciar a partida será através de um consenso entre os jogadores, via chat.\n"
+				  "1. O primeiro a iniciar a partida será através de um consenso entre os jogadores, via chat;\n"
 				+ "2. Ao clicar em uma casa, as sementes são distribuídas automaticamente;\n"
 				+ "3. Os direitos de captura de sementes do adversário e de uma nova jogada são verificadas e informadas automaticamente aos jogadores."
 				+ ""
@@ -586,11 +585,19 @@ public class Tela extends JFrame {
 	private void btnDesfazerJogadaActionPerformed(ActionEvent e) {
 		this.game.desfazerJogada();
 		this.atualizaTabuleiro(game);
+		
+		Long idJogadorEu = this.eu.getId();
+		String msgOutput = Commands.COMMAND_UNDO + "/" + idJogadorEu;
+		this.enviaMensagemComando(msgOutput);
 	}
 	
 	private void btnRefazerJogadaActionPerformed(ActionEvent e) {
 		this.game.refazerJogada();
 		this.atualizaTabuleiro(game);
+		
+		Long idJogadorEu = this.eu.getId();
+		String msgOutput = Commands.COMMAND_REDO + "/" + idJogadorEu;
+		this.enviaMensagemComando(msgOutput);
 	}
 	
 	private void btnReiniciarActionPerformed(ActionEvent e) {
@@ -618,8 +625,8 @@ public class Tela extends JFrame {
 	private void btnSairActionPerformed(ActionEvent e) {
 		int opcao = JOptionPane.showConfirmDialog(this, "Deseja realmente sair?", "Confirmação", JOptionPane.WARNING_MESSAGE);
 		if(opcao == 0) {
-			String msgOutput = Commands.COMMAND_EXIT;
-			this.enviaMensagemComando(msgOutput);
+			//String msgOutput = Commands.COMMAND_EXIT;
+			//this.enviaMensagemComando(msgOutput);
 			System.exit(0);
 		}
 	}
@@ -974,11 +981,15 @@ public class Tela extends JFrame {
 	}
 	
 	private void executaDesfazerJogada() {
-		//
+		game.desfazerJogada();
+		game.mudaJogadorDaVez(eu == Jogador.AMARELO ? Jogador.AMARELO : Jogador.AZUL);
+		this.atualizaTabuleiro(game);
 	}
 	
 	private void executaRefazerJogada() {
-		//
+		game.desfazerJogada();
+		game.mudaJogadorDaVez(eu == Jogador.AMARELO ? Jogador.AMARELO : Jogador.AZUL);
+		this.atualizaTabuleiro(game);
 	}
 	
 	public static void main(String[] args) {
