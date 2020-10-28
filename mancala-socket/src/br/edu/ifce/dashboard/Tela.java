@@ -1,24 +1,37 @@
 package br.edu.ifce.dashboard;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import br.edu.ifce.exceptions.JogadorInvalidoException;
+import lombok.Getter;
 
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.awt.Color;
+import java.awt.EventQueue;
+
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
 
 public class Tela extends JFrame {
 
@@ -32,21 +45,29 @@ public class Tela extends JFrame {
 	private GameGeneralRules game;
 	private Jogador eu;
 	private Jogador adversario;
+	
+	static ServerSocket serverSocket;
+	static Socket socket;
+	static DataInputStream dataInputStream;
+	static DataOutputStream dataOutputStream;
+
+//	private PrintWriter writer;
+	//private BufferedReader reader; 
 
 	/**
 	 * Create the frame.
 	 */
 	public Tela() {
 		this.initComponents();
+		//this.preencherListaJogadores();
 		this.game = this.instanciaJogo();
 		this.atualizaTabuleiro(this.game);
 		
-		this.estabeleceConexao();
-		this.estabeleceJogadores();
+		this.estabeleceConexao(true);
+		//this.estabeleceJogadores();
 	}
 	
 	private void initComponents() {
-
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 600);
 		contentPane = new JPanel();
@@ -55,24 +76,8 @@ public class Tela extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		//Textarea do chat
-		textAreaChat = new JTextArea();
-		textAreaChat.setBounds(549, 91, 225, 331);
-		textAreaChat.setLineWrap(true);
-		textAreaChat.setWrapStyleWord(true);
-		contentPane.add(textAreaChat);
-		
 		//Campo de texto para o jogador escrever uma mensagem
 		textField_mensagem = new JTextField();
-		textField_mensagem.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-					System.out.println("pressionou enter");
-					//Envia mensagem
-				}
-			}
-		});
 		textField_mensagem.setBounds(549, 433, 225, 35);
 		contentPane.add(textField_mensagem);
 		textField_mensagem.setColumns(10);
@@ -199,6 +204,27 @@ public class Tela extends JFrame {
 		labelInfo.setBounds(220, 267, 250, 25);
 		contentPane.add(labelInfo);
 		
+		scrollPane = new JScrollPane();
+		scrollPane.setBounds(549, 91, 225, 330);
+		contentPane.add(scrollPane);
+		
+		//Textarea do chat
+		textAreaChat = new JTextArea();
+		scrollPane.setViewportView(textAreaChat);
+		textAreaChat.setEditable(false);
+		textAreaChat.setLineWrap(true);
+		textAreaChat.setWrapStyleWord(true);
+		
+		btnInformacoes = new JButton("Inform\u00E7\u00F5es");
+		btnInformacoes.setBounds(20, 11, 89, 23);
+		contentPane.add(btnInformacoes);
+		
+		btnInformacoes.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				btnInformacoesActionPerformed(e);
+			}
+		});
+		
 		btnEnviarMsg.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btnEnviarMsgActionPerformed(e);
@@ -306,7 +332,60 @@ public class Tela extends JFrame {
 				btnCasaB6ActionPerformed(e);
 			}
 		});
+		
+		textField_mensagem.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				textField_mensagemKeyReleased(e);
+			}
+		});
 	}
+	
+	/*private void iniciarEscritor() {
+		textField_mensagem.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+				
+					textAreaChat.append(textField_mensagem.getText() + "\n");
+					
+					String msgTerminal = textField_mensagem.getText();
+						
+					if(msgTerminal == null || msgTerminal.isEmpty()) {
+						return;
+					}
+					
+					Object jogadorSelecionadoNaListaChat = list.getSelectedValue();
+					
+					if(jogadorSelecionadoNaListaChat != null) {
+						writer.println(Commands.DEFAULT_MESSAGE_COMMAND + jogadorSelecionadoNaListaChat);
+						writer.println(msgTerminal);
+						textField_mensagem.setText("");
+						
+					} else {
+						if(msgTerminal.equalsIgnoreCase(Commands.COMAND_EXIT)) {
+							System.exit(0);
+						}
+						
+						JOptionPane.showMessageDialog(Tela.this, "Selecione um usuário");
+						return;
+					}
+				}
+			}
+		});
+	}*/
+	
+	/*private void preencherListaJogadores() {
+		DefaultListModel<String> modelo = new DefaultListModel<String>();
+		
+		String[] listaJogadores = new String[] {Jogador.AMARELO.getDescricao(), Jogador.AZUL.getDescricao()};
+		list.setModel(modelo);
+		
+		for(String usuario : listaJogadores) {
+			modelo.addElement(usuario);
+		}
+	}*/
 	
 	private GameGeneralRules instanciaJogo() {
 		GameGeneralRules game = new GameGeneralRules();
@@ -360,15 +439,33 @@ public class Tela extends JFrame {
 		return game.getJogadorDaVez() == jogadorQueQuerJogar;
 	}
 	
-	private void estabeleceConexao() {
+	private void estabeleceConexao(boolean isServidor) {
+		
+		if(isServidor) {
+			
+			
+		} else { //isClient
+			
+		}
+		
 		return;
 	}
 	
-	private void estabeleceJogadores() {
-		this.eu = Jogador.AMARELO;
-		this.adversario = Jogador.AZUL;
-		game.mudaJogadorDaVez(Jogador.AMARELO);
-		game.mudaJogadorDaVez(Jogador.AZUL);
+	private void estabeleceJogadores(boolean isServidor) {
+		if(isServidor) {
+			this.eu = Jogador.AMARELO;
+			this.adversario = Jogador.AZUL;
+			game.mudaJogadorDaVez(Jogador.AMARELO);
+			game.mudaJogadorDaVez(Jogador.AZUL);
+			
+		} else {
+			this.eu = Jogador.AZUL;
+			this.adversario = Jogador.AMARELO;
+			game.mudaJogadorDaVez(Jogador.AZUL);
+			game.mudaJogadorDaVez(Jogador.AMARELO);
+		}
+		
+		
 		this.desabilitaBotoesAdversarios(eu);
 	}
 	
@@ -382,7 +479,7 @@ public class Tela extends JFrame {
 		}
 	}
 	
-	private void moverSementes(Integer casaEscolhidaNoTabuleiro, Jogador jogador) throws NullPointerException {
+	public void moverSementes(Integer casaEscolhidaNoTabuleiro, Jogador jogador) throws NullPointerException {
 		try {
 			int posicaoCasaNaLista = casaEscolhidaNoTabuleiro - 1;
 			CasaUltimaSemente ultimaCasa = this.game.moveSementes(posicaoCasaNaLista, jogador);
@@ -425,11 +522,13 @@ public class Tela extends JFrame {
 					String mensagem = "Parabéns! Você venceu.";
 					int messageType = JOptionPane.INFORMATION_MESSAGE;
 					this.mostraMensagem(mensagem, messageType);
+					this.labelInfo.setText(mensagem);
 					
 				} else if(vencedor == adversario) {
 					String mensagem = "Seu adversário venceu.";
 					int messageType = JOptionPane.INFORMATION_MESSAGE;
 					this.mostraMensagem(mensagem, messageType);
+					this.labelInfo.setText(mensagem);
 				}
 				
 				this.atualizaTabuleiro(game);
@@ -446,7 +545,42 @@ public class Tela extends JFrame {
 	
 	/* Actions Performed - START */
 	private void btnEnviarMsgActionPerformed(ActionEvent e) {
-		System.out.println("Pressionou botão Enviar");
+		enviaMensagem();
+	}
+	
+	private void textField_mensagemKeyReleased(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+			enviaMensagem();
+		}
+	}
+	
+	private void btnInformacoesActionPerformed(ActionEvent e) {
+		JOptionPane.showMessageDialog(this,
+				  "1. O primeiro a iniciar a partida será através de um consenso entre os jogadores, via chat.\n"
+				+ "2. Ao clicar em uma casa, as sementes são distribuídas automaticamente;\n"
+				+ "3. Os direitos de captura de sementes do adversário e de uma nova jogada são verificadas e informadas automaticamente aos jogadores."
+				+ ""
+				+ ""
+				+ ""
+				+ "");
+	}
+	
+	private void enviaMensagem() {
+		try {
+			String msgSaida = "";
+			msgSaida = textField_mensagem.getText().trim();
+			
+			if(msgSaida != null && !msgSaida.isEmpty()) {
+				dataOutputStream.writeUTF(msgSaida);
+				textAreaChat.append("me: " + msgSaida + "\n");	
+			}
+			
+			textField_mensagem.setText("");
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void btnDesfazerJogadaActionPerformed(ActionEvent e) {
@@ -464,8 +598,9 @@ public class Tela extends JFrame {
 		if(opcao == 0) {
 			this.game.reiniciarPartida();
 			this.atualizaTabuleiro(game);
-			//this.labelInfo.setText("Você desistiu! =( Seu adversário venceu.");
-			//Enviar para o outro jogador mensagem que ele ganhou
+
+			String msgOutput = Commands.COMMAND_RESET_GAME;
+			this.enviaMensagemComando(msgOutput);
 		}
 	}
 	
@@ -474,142 +609,439 @@ public class Tela extends JFrame {
 		if(opcao == 0) {
 			Jogador vencedor = this.game.desistir(eu);
 			this.labelInfo.setText("Você desistiu! =( Seu adversário venceu.");
-			//Enviar para o outro jogador mensagem que ele ganhou
+			
+			String msgOutput = Commands.COMMAND_GIVE_UP + "/" + vencedor.getId();
+			this.enviaMensagemComando(msgOutput);
 		}
 	}
 	
 	private void btnSairActionPerformed(ActionEvent e) {
 		int opcao = JOptionPane.showConfirmDialog(this, "Deseja realmente sair?", "Confirmação", JOptionPane.WARNING_MESSAGE);
-		if(opcao == 0)
+		if(opcao == 0) {
+			String msgOutput = Commands.COMMAND_EXIT;
+			this.enviaMensagemComando(msgOutput);
 			System.exit(0);
+		}
+	}
+	
+	private void enviaMensagemComando(String mensagem) {
+		try {
+			dataOutputStream.writeUTF(mensagem);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 	
 	private void btnCasaA1ActionPerformed(ActionEvent e) {
+		int idCasa = 1;
+		Long idJogador = Jogador.AMARELO.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AMARELO)) {
 			game.mudaJogadorDaVez(Jogador.AMARELO);
 			int casaNoTabuleiro = 1;
-			this.moverSementes(casaNoTabuleiro, eu);	
+			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
+			
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
 		}
 	}
 	
 	private void btnCasaA2ActionPerformed(ActionEvent e) {
+		int idCasa = 2;
+		Long idJogador = Jogador.AMARELO.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AMARELO)) {
 			game.mudaJogadorDaVez(Jogador.AMARELO);
 			int casaNoTabuleiro = 2;
 			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
 		}
 	}
 	
 	private void btnCasaA3ActionPerformed(ActionEvent e) {
+		int idCasa = 3;
+		Long idJogador = Jogador.AMARELO.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AMARELO)) {
 			game.mudaJogadorDaVez(Jogador.AMARELO);
 			int casaNoTabuleiro = 3;
 			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
 		}
 	}
 	
 	private void btnCasaA4ActionPerformed(ActionEvent e) {
+		int idCasa = 4;
+		Long idJogador = Jogador.AMARELO.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AMARELO)) {
 			game.mudaJogadorDaVez(Jogador.AMARELO);
 			int casaNoTabuleiro = 4;
-			this.moverSementes(casaNoTabuleiro, eu);	
+			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
 		}
 	}
 	
 	private void btnCasaA5ActionPerformed(ActionEvent e) {
+		int idCasa = 5;
+		Long idJogador = Jogador.AMARELO.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AMARELO)) {
 			game.mudaJogadorDaVez(Jogador.AMARELO);
 			int casaNoTabuleiro = 5;
 			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
 		}
 	}
 	
 	private void btnCasaA6ActionPerformed(ActionEvent e) {
+		int idCasa = 6;
+		Long idJogador = Jogador.AMARELO.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AMARELO)) {
 			game.mudaJogadorDaVez(Jogador.AMARELO);
 			int casaNoTabuleiro = 6;
 			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador azul!");
 		}
 	}
 	
 	private void btnCasaB1ActionPerformed(ActionEvent e) {
+		int idCasa = 1;
+		Long idJogador = Jogador.AZUL.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AZUL)) {
 			game.mudaJogadorDaVez(Jogador.AZUL);
 			int casaNoTabuleiro = 1;
-			this.moverSementes(casaNoTabuleiro, adversario);	
+			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
 		}
 	}
 	
 	private void btnCasaB2ActionPerformed(ActionEvent e) {
+		int idCasa = 2;
+		Long idJogador = Jogador.AZUL.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AZUL)) {
 			game.mudaJogadorDaVez(Jogador.AZUL);
 			int casaNoTabuleiro = 2;
-			this.moverSementes(casaNoTabuleiro, adversario);
+			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
 		}
 	}
 	
 	private void btnCasaB3ActionPerformed(ActionEvent e) {
+		int idCasa = 3;
+		Long idJogador = Jogador.AZUL.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AZUL)) {
 			game.mudaJogadorDaVez(Jogador.AZUL);
 			int casaNoTabuleiro = 3;
-			this.moverSementes(casaNoTabuleiro, adversario);
+			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
 		}
 	}
 	
 	private void btnCasaB4ActionPerformed(ActionEvent e) {
+		int idCasa = 4;
+		Long idJogador = Jogador.AZUL.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AZUL)) {
 			game.mudaJogadorDaVez(Jogador.AZUL);
 			int casaNoTabuleiro = 4;
-			this.moverSementes(casaNoTabuleiro, adversario);
+			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
 		}
 	}
 	
 	private void btnCasaB5ActionPerformed(ActionEvent e) {
+		int idCasa = 5;
+		Long idJogador = Jogador.AZUL.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AZUL)) {
 			game.mudaJogadorDaVez(Jogador.AZUL);
 			int casaNoTabuleiro = 5;
-			this.moverSementes(casaNoTabuleiro, adversario);
+			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
 		}
 	}
 	
 	private void btnCasaB6ActionPerformed(ActionEvent e) {
+		int idCasa = 6;
+		Long idJogador = Jogador.AZUL.getId();
+		String msgSaida = Commands.COMMAND_MOVE_SEEDS + "/" + idCasa + "/" + idJogador;
+		
 		if(validaJogada(Jogador.AZUL)) {
 			game.mudaJogadorDaVez(Jogador.AZUL);
 			int casaNoTabuleiro = 6;
-			this.moverSementes(casaNoTabuleiro, adversario);
+			this.moverSementes(casaNoTabuleiro, eu);
+			this.enviaMensagemComando(msgSaida);
 		} else {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
 		}
 	}
+	
+	/*public void iniciarChat() {
+		try {
+			final Socket clientSocket = new Socket(Commands.DEFAULT_LOCAL_SERVER, 9999);
+			
+			Boolean autoFlush = true;
+			writer = new PrintWriter(clientSocket.getOutputStream(), autoFlush);
+			
+			InputStreamReader inputStreamReader = new InputStreamReader(clientSocket.getInputStream());
+			reader = new BufferedReader(inputStreamReader);
+			
+			try {
+				
+				while(true) {
+					String msg = reader.readLine();
+					
+					if(msg == null || msg.isEmpty()) {
+						continue;
+					}
+					
+					textAreaChat.append("Resposta do servidor: " + msg);
+				}
+				
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, "Não foi possível ler a mensagem do servidor.");
+				e.printStackTrace();
+			}
+			
+		} catch (UnknownHostException e) {
+			JOptionPane.showMessageDialog(null, "Endereço inválido");
+			e.printStackTrace();
+		
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, "Falha ao iniciar");
+			e.printStackTrace();
+		}
+	}*/
+	
+	public void gerenciaClienteServidor(Boolean isServidor, Integer porta, String host) {
+		
+		this.estabeleceJogadores(isServidor);
+		
+		if(isServidor) {
+			
+			String mensagemEntrada = "";
+			
+			try {
+				serverSocket = new ServerSocket(porta);
+				socket = serverSocket.accept();
+				
+				dataInputStream = new DataInputStream(socket.getInputStream());
+				dataOutputStream = new DataOutputStream(socket.getOutputStream());			
+				
+				while(true) {
+					mensagemEntrada = dataInputStream.readUTF();
+					
+					if(mensagemEntrada.startsWith(Commands.DEFAULT_COMMAND)) {
+						executaComando(mensagemEntrada);
+						
+					} else {
+						textAreaChat.append("Client: " + mensagemEntrada + "\n");	
+					}
+				}
+				
+			} catch(IOException e) {
+				JOptionPane.showMessageDialog(this, "Falha! O servidor foi finalizado ou a porta informada pode já estar em uso.", "Falha", JOptionPane.WARNING_MESSAGE);
+				e.printStackTrace();
+				System.exit(0);
+			}
+			
+		} else { //isClient
+			try {
+				socket = new Socket(host, porta);
+				dataInputStream = new DataInputStream(socket.getInputStream());
+				dataOutputStream = new DataOutputStream(socket.getOutputStream());
+				
+				String msgEntrada = "";
+				
+				while(true) {
+					msgEntrada = dataInputStream.readUTF();
+					
+					if(msgEntrada.startsWith(Commands.DEFAULT_COMMAND)) {
+						executaComando(msgEntrada);
+						
+					} else {
+						textAreaChat.append("Server: " + msgEntrada + "\n");	
+					}
+				}
+						
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void executaComando(String comando) {
+		System.out.println("executando");
+		System.out.println(comando);
+		
+		String[] parametros = comando.split("/");
+		String mainCommand = parametros[0];
+		
+		if(mainCommand.equals(Commands.COMMAND_MOVE_SEEDS)) {
+			executaMover(parametros[1], parametros[2]);
+		
+		} else if(mainCommand.equals(Commands.COMMAND_GIVE_UP)) {
+			executaDesistirJogo(parametros[1]);
+			
+		} else if(mainCommand.equals(Commands.COMMAND_UNDO)) {
+			executaDesfazerJogada();
+		
+		} else if(mainCommand.equals(Commands.COMMAND_REDO)) {
+			executaRefazerJogada();
+		
+		} else if(mainCommand.equals(Commands.COMMAND_RESET_GAME)) {
+			executaReiniciarPartida();
+		
+		} else if(mainCommand.equals(Commands.COMMAND_EXIT)) {
+			this.labelInfo.setText("Seu adversário saiu do jogo.");
+		}
+		
+	}
+	
+	private void executaReiniciarPartida() {
+		this.game.reiniciarPartida();
+		this.atualizaTabuleiro(game);
+		this.labelInfo.setText("Partida reiniciada.");
+	}
+	
+	private void executaDesistirJogo(String idJogadorVencedor) {
+		if(Integer.parseInt(idJogadorVencedor) == eu.getId()) {
+			this.labelInfo.setText("Você venceu! Seu adversário desistiu.");
+		}
+	}
+	
+	private void executaMover(String idCasaEscolhida, String idJogador) {
+		System.out.println("movendo");
+		
+		Integer casaEscolhida = Integer.parseInt(idCasaEscolhida);
+		Jogador jogador;
+		
+		try {
+			jogador = Jogador.getById(Long.parseLong(idJogador));
+			this.game.mudaJogadorDaVez(jogador == Jogador.AMARELO ? Jogador.AMARELO : Jogador.AZUL);
+			this.moverSementes(casaEscolhida, jogador);
+			this.atualizaTabuleiro(game);
+			
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JogadorInvalidoException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void executaDesfazerJogada() {
+		//
+	}
+	
+	private void executaRefazerJogada() {
+		//
+	}
+	
+	public static void main(String[] args) {
+		
+		Boolean isServidor = false;
+		Integer porta = null;
+		String host = null;
+		
+		int valor = JOptionPane.showConfirmDialog(null, "Você está entrando como servidor?", "Servidor ou Cliente", JOptionPane.YES_NO_OPTION);
+		
+		if(valor == 0) { //Pressionou 'Yes'
+			isServidor = true;
+			
+			String input = null;
+			while (input == null || input.isEmpty()) {
+				input = JOptionPane.showInputDialog(null, "Informe a porta do servidor", "Porta do Servidor", JOptionPane.QUESTION_MESSAGE);	
+			}
+			
+			porta = Integer.parseInt(input);
+			
+		} else if(valor == 1) { //Pressionou 'No'
+			isServidor = false;
+			String inputHost = null;
+			String inputPort = null;
+			
+			JOptionPane.showMessageDialog(null, "Atenção! Você está entrando como cliente.");
+			
+			while(inputHost == null || inputHost.isEmpty()) {
+				inputHost = JOptionPane.showInputDialog(null, "Informe o host", "Porta do Servidor", JOptionPane.QUESTION_MESSAGE);
+			}
+			
+			while(inputPort == null || inputPort.isEmpty()) {
+				inputPort = JOptionPane.showInputDialog(null, "Informe a porta do servidor", "Porta do Servidor", JOptionPane.QUESTION_MESSAGE);
+			}
+			
+			porta = Integer.parseInt(inputPort);
+		}
+		
+		/*EventQueue.invokeLater(new Runnable() {
+			public void run() {*/
+				try {
+					Tela frame = new Tela();
+					frame.setTitle("Mancala - Sockets");
+					frame.setSize(800, 600);
+					frame.setVisible(true);
+					
+					frame.gerenciaClienteServidor(isServidor, porta, host);
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			/*}
+		});*/
+	}
+	
 	
 	/* Actions Performed - END */
 	
 	/**
 	 * Declaração das variáveis utilizadas na tela (botões, labels etc).
 	 * */
-	private JTextArea textAreaChat;
+	@Getter
+	private static JTextArea textAreaChat;
 	private JTextField textField_mensagem;
 	private JButton btnEnviarMsg;
 	private JButton btnDesfazerJogada;
@@ -632,5 +1064,6 @@ public class Tela extends JFrame {
 	private JButton btnCasaB5;
 	private JButton btnCasaB6;
 	private JLabel labelInfo;
-
+	private JScrollPane scrollPane;
+	private JButton btnInformacoes;
 }

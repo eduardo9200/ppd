@@ -3,8 +3,8 @@ package br.edu.ifce.dashboard;
 import br.edu.ifce.exceptions.JogadorInvalidoException;
 
 public enum Jogador {
-	AMARELO (1L, "Jogador 1"),
-	AZUL (2L, "Jogador 2"),
+	AMARELO (1L, "Jogador Amarelo"),
+	AZUL (2L, "Jogador Azul"),
 	NENHUM(3l, "Empate");
 	
 	
