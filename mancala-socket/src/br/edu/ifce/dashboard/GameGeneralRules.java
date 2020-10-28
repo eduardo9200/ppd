@@ -82,7 +82,7 @@ public class GameGeneralRules {
 			jogadorDaVez = Jogador.AMARELO;
 		else
 			jogadorDaVez = Jogador.NENHUM;
-		System.out.println(jogadorDaVez);
+		//System.out.println(jogadorDaVez);
 	}
 	
 	/**

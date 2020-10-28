@@ -415,7 +415,7 @@ public class Tela extends JFrame {
 		this.casasJogador_1 = game.getTabuleiroJogador_1();
 		this.casasJogador_2 = game.getTabuleiroJogador_2();
 		
-		System.out.println("Jogador da Vez: " + game.getJogadorDaVez().getDescricao());
+		//System.out.println("Jogador da Vez: " + game.getJogadorDaVez().getDescricao());
 		
 		this.btnCasaA1.setText(this.casasJogador_1.get(0).toString());
 		this.btnCasaA2.setText(this.casasJogador_1.get(1).toString());
@@ -920,8 +920,8 @@ public class Tela extends JFrame {
 	}
 	
 	private void executaComando(String comando) {
-		System.out.println("executando");
-		System.out.println(comando);
+		//System.out.println("executando");
+		//System.out.println(comando);
 		
 		String[] parametros = comando.split("/");
 		String mainCommand = parametros[0];
@@ -960,7 +960,7 @@ public class Tela extends JFrame {
 	}
 	
 	private void executaMover(String idCasaEscolhida, String idJogador) {
-		System.out.println("movendo");
+		//System.out.println("movendo");
 		
 		Integer casaEscolhida = Integer.parseInt(idCasaEscolhida);
 		Jogador jogador;
