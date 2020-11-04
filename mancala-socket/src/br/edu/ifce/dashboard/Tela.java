@@ -58,7 +58,6 @@ public class Tela extends JFrame {
 		this.game = this.instanciaJogo();
 		this.atualizaTabuleiro(this.game);
 		
-		this.estabeleceConexao(true);
 		//this.estabeleceJogadores();
 	}
 	
@@ -87,15 +86,15 @@ public class Tela extends JFrame {
 		
 		//Desfazer Jogada
 		btnDesfazerJogada = new JButton("Desfazer");
-		btnDesfazerJogada.setToolTipText("Bug N\u00E3o resolvido");
-		btnDesfazerJogada.setEnabled(false);
+		//btnDesfazerJogada.setToolTipText("Bug N\u00E3o resolvido");
+		//btnDesfazerJogada.setEnabled(false);
 		btnDesfazerJogada.setBounds(20, 257, 89, 35);
 		contentPane.add(btnDesfazerJogada);
 		
 		//Refazer Jogada
 		btnRefazerJogada = new JButton("Refazer");
-		btnRefazerJogada.setToolTipText("Bug n\u00E3o resolvido");
-		btnRefazerJogada.setEnabled(false);
+		//btnRefazerJogada.setToolTipText("Bug n\u00E3o resolvido");
+		//btnRefazerJogada.setEnabled(false);
 		btnRefazerJogada.setBounds(121, 257, 89, 35);
 		contentPane.add(btnRefazerJogada);
 		
@@ -340,52 +339,6 @@ public class Tela extends JFrame {
 		});
 	}
 	
-	/*private void iniciarEscritor() {
-		textField_mensagem.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				
-				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-				
-					textAreaChat.append(textField_mensagem.getText() + "\n");
-					
-					String msgTerminal = textField_mensagem.getText();
-						
-					if(msgTerminal == null || msgTerminal.isEmpty()) {
-						return;
-					}
-					
-					Object jogadorSelecionadoNaListaChat = list.getSelectedValue();
-					
-					if(jogadorSelecionadoNaListaChat != null) {
-						writer.println(Commands.DEFAULT_MESSAGE_COMMAND + jogadorSelecionadoNaListaChat);
-						writer.println(msgTerminal);
-						textField_mensagem.setText("");
-						
-					} else {
-						if(msgTerminal.equalsIgnoreCase(Commands.COMAND_EXIT)) {
-							System.exit(0);
-						}
-						
-						JOptionPane.showMessageDialog(Tela.this, "Selecione um usuário");
-						return;
-					}
-				}
-			}
-		});
-	}*/
-	
-	/*private void preencherListaJogadores() {
-		DefaultListModel<String> modelo = new DefaultListModel<String>();
-		
-		String[] listaJogadores = new String[] {Jogador.AMARELO.getDescricao(), Jogador.AZUL.getDescricao()};
-		list.setModel(modelo);
-		
-		for(String usuario : listaJogadores) {
-			modelo.addElement(usuario);
-		}
-	}*/
-	
 	private GameGeneralRules instanciaJogo() {
 		GameGeneralRules game = new GameGeneralRules();
 		game.criaTabuleiro();
@@ -438,17 +391,6 @@ public class Tela extends JFrame {
 		return game.getJogadorDaVez() == jogadorQueQuerJogar;
 	}
 	
-	private void estabeleceConexao(boolean isServidor) {
-		
-		if(isServidor) {
-			
-			
-		} else { //isClient
-			
-		}
-		
-		return;
-	}
 	
 	private void estabeleceJogadores(boolean isServidor) {
 		if(isServidor) {
@@ -820,43 +762,6 @@ public class Tela extends JFrame {
 			JOptionPane.showMessageDialog(this, "É a vez do jogador amarelo");
 		}
 	}
-	
-	/*public void iniciarChat() {
-		try {
-			final Socket clientSocket = new Socket(Commands.DEFAULT_LOCAL_SERVER, 9999);
-			
-			Boolean autoFlush = true;
-			writer = new PrintWriter(clientSocket.getOutputStream(), autoFlush);
-			
-			InputStreamReader inputStreamReader = new InputStreamReader(clientSocket.getInputStream());
-			reader = new BufferedReader(inputStreamReader);
-			
-			try {
-				
-				while(true) {
-					String msg = reader.readLine();
-					
-					if(msg == null || msg.isEmpty()) {
-						continue;
-					}
-					
-					textAreaChat.append("Resposta do servidor: " + msg);
-				}
-				
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "Não foi possível ler a mensagem do servidor.");
-				e.printStackTrace();
-			}
-			
-		} catch (UnknownHostException e) {
-			JOptionPane.showMessageDialog(null, "Endereço inválido");
-			e.printStackTrace();
-		
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, "Falha ao iniciar");
-			e.printStackTrace();
-		}
-	}*/
 	
 	public void gerenciaClienteServidor(Boolean isServidor, Integer porta, String host) {
 		
