@@ -6,8 +6,8 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/eduma/Downloads/gson-2.8.6.jar"/>
-	<classpathentry kind="lib" path="C:/Users/eduma/OneDrive/Área de Trabalho/Lombok 1.16.6/1.16.6/lombok-1.16.6.jar"/>
-	<classpathentry kind="lib" path="C:/Users/eduma/Downloads/javax.annotation-api-1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/eduardo.maia/Desktop/lombok-1.16.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/eduardo.maia/Desktop/javax.annotation-api-1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/eduardo.maia/Desktop/gson-2.8.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
