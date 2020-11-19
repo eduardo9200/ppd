@@ -37,7 +37,7 @@ public class ServerOperationsImpl extends UnicastRemoteObject implements ServerO
 			throw new DuplicateNameException("O nome " + clientInfo.getName() + " já existe no chat.");
 		}
 		
-		String message = clientInfo.getName() + " entrou no chat";
+		String message = clientInfo.getName() + " entrou no chat/" + clients.size();
 		String formattedMessage = formatMessageFromServerToClients(message);
 		
 		broadcastMessage(formattedMessage);

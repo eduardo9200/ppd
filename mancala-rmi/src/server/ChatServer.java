@@ -24,12 +24,11 @@ public class ChatServer extends JFrame implements WindowListener {
 	
 	private JPanel contentPane;
 	private JTextField textFieldPort;
-	private JTextField textFieldHost;
 
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -40,7 +39,7 @@ public class ChatServer extends JFrame implements WindowListener {
 				}
 			}
 		});
-	}
+	}*/
 
 	/**
 	 * Create the frame.
@@ -60,20 +59,10 @@ public class ChatServer extends JFrame implements WindowListener {
 		contentPane.add(textFieldPort);
 		textFieldPort.setColumns(10);
 		
-		lblHost = new JLabel("Host");
-		lblHost.setBounds(10, 20, 35, 14);
-		contentPane.add(lblHost);
-		
 		lblPort = new JLabel("Port");
 		lblPort.setLabelFor(textFieldPort);
 		lblPort.setBounds(10, 63, 29, 14);
 		contentPane.add(lblPort);
-		
-		textFieldHost = new JTextField();
-		lblHost.setLabelFor(textFieldHost);
-		textFieldHost.setBounds(50, 11, 197, 32);
-		contentPane.add(textFieldHost);
-		textFieldHost.setColumns(10);
 		
 		btnIniciar = new JButton("Iniciar");
 		btnIniciar.setBounds(50, 135, 89, 23);
@@ -189,7 +178,6 @@ public class ChatServer extends JFrame implements WindowListener {
 	
 	private JButton btnIniciar;
 	private JButton btnParar;
-	private JLabel 	lblHost;
 	private JLabel 	lblPort;
 	private JLabel	lblInfo;
 }

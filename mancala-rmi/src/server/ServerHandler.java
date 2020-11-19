@@ -34,7 +34,7 @@ public class ServerHandler {
 	private int port;
 	
 	public ServerHandler() throws ChatException, IOException {
-		this.props = new Properties();
+		/*this.props = new Properties();
 		File file = new File(CONFIG_FILE);
 		
 		if(file.exists()) {
@@ -56,7 +56,7 @@ public class ServerHandler {
 			registry = LocateRegistry.createRegistry(getServerPort(null));
 		} catch(RemoteException e) {
 			throw new ChatException("Erro ao carregar o Registry", e);
-		}
+		}*/
 	}
 	
 	public int startServer(String inputPort) throws ChatException {
